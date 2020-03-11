@@ -27,14 +27,20 @@ function App() {
   const audioContextRef = React.useRef(
     new (window.AudioContext || window.webkitAudioContext)()
   );
-  const audioContext = audioContextRef.current;
-
   const nodeRef = React.useRef(null);
 
-  console.log(audioContext);
-
   async function loadModule() {
-    await audioContext.audioWorklet.addModule(`worklet/noise-gen.js`);
+    if (audioContextRef.current.audioWorklet) {
+      await audioContextRef.current.audioWorklet.addModule(
+        `worklet/noise-gen.js`
+      );
+    } else {
+      await import("audioworklet-polyfill");
+      await audioContextRef.current.audioWorklet.addModule(
+        `worklet/noise-gen.js`
+      );
+    }
+
     setLoadModule(false);
   }
 
@@ -42,14 +48,14 @@ function App() {
     if (isPlaying) {
       nodeRef.current.port.postMessage(false);
     } else {
-      nodeRef.current = getNoiseGeneratorNode(audioContext);
+      nodeRef.current = getNoiseGeneratorNode(audioContextRef.current);
       nodeRef.current.port.postMessage(true);
     }
 
     setIsPlaying(isPlaying => !isPlaying);
   }
 
-  if (!audioContext) {
+  if (!audioContextRef.current) {
     return <div>Audio context not supported!</div>;
   }
 

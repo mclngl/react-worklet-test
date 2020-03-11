@@ -37,7 +37,7 @@ class NoiseGenerator extends AudioWorkletProcessor {
           (isAmplitudeConstant ? amplitude[0] : amplitude[i]);
       }
     }
-
+    console.log(this.isPlaying);
     return this.isPlaying;
   }
 }
